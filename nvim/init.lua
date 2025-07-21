@@ -10,10 +10,19 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
     })
 end
 vim.opt.rtp:prepend(lazypath)
--- call 
-require("huy.config.keymaps")
-require("huy.config.options")
-require("lazy").setup("huy.plugins")
+
+
+require("dev.core.options")
+require("dev.core.keymaps")
+
+-- require("lazy").setup("dev.plugins")
+require("lazy").setup({
+    spec ={
+        { import = "dev.plugins"},
+        { import = "dev.ui" },
+    },
+})
+
 --set theme
 vim.o.background = "dark" 
 vim.cmd([[colorscheme gruvbox]])
