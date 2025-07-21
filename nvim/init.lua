@@ -15,20 +15,20 @@ require("huy.config.keymaps")
 require("huy.config.options")
 require("lazy").setup("huy.plugins")
 --set theme
--- vim.cmd([[colorscheme gruvbox]])
-vim.cmd([[colorscheme everblush]])
+vim.o.background = "dark" 
+vim.cmd([[colorscheme gruvbox]])
 -- remove ~
 
 vim.opt.fillchars:append { eob = " " }
 
 --turn off backgournd
--- vim.cmd [[
-  -- highlight Normal guibg=NONE ctermbg=NONE
-  -- highlight NormalNC guibg=NONE ctermbg=NONE
-  -- highlight SignColumn guibg=NONE ctermbg=NONE
-  -- highlight VertSplit guibg=NONE ctermbg=NONE
-  -- highlight EndOfBuffer guibg=NONE ctermbg=NONE
--- ]]
+ vim.cmd [[
+ highlight Normal guibg=NONE ctermbg=NONE
+ highlight NormalNC guibg=NONE ctermbg=NONE
+ highlight SignColumn guibg=NONE ctermbg=NONE
+ highlight VertSplit guibg=NONE ctermbg=NONE
+ highlight EndOfBuffer guibg=NONE ctermbg=NONE
+ ]]
 
 vim.cmd [[
     let g:ale_linters = {
@@ -40,3 +40,9 @@ vim.cmd [[
     let g:ale_fix_on_save = 1
 ]]
 
+vim.diagnostic.config({
+  virtual_text = false,  -- remove inline virtual text
+  signs = false,         -- remove signs in the sign column
+  underline = false,     -- no underlining
+  update_in_insert = false,
+})
