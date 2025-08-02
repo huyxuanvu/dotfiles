@@ -30,6 +30,9 @@ yay -S --noconfirm \
     zsh zsh-syntax-highlighting zsh-autosuggestions
 
 
-yay -S --noconfirm \ neovim \ xclip \ fzf \ ripgrep \ npm \ miniconda3 
+yay -S --noconfirm \
+    neovim xclip fzf ripgrep nodejs \
+    miniconda3
+
 
 echo "✅ done "
