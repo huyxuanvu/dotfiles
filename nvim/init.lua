@@ -11,47 +11,14 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-
 require("dev.core.options")
 require("dev.core.keymaps")
 
--- require("lazy").setup("dev.plugins")
 require("lazy").setup({
-    spec ={
-        { import = "dev.plugins"},
-        { import = "dev.ui" },
+  spec = {
+    { import = "dev.plugins"},
+    { import = "dev.ui" },
     },
 })
 
---set theme
-vim.o.background = "dark" 
-vim.cmd([[colorscheme gruvbox]])
--- remove ~
 
-vim.opt.fillchars:append { eob = " " }
-
---turn off backgournd
- vim.cmd [[
- highlight Normal guibg=NONE ctermbg=NONE
- highlight NormalNC guibg=NONE ctermbg=NONE
- highlight SignColumn guibg=NONE ctermbg=NONE
- highlight VertSplit guibg=NONE ctermbg=NONE
- highlight EndOfBuffer guibg=NONE ctermbg=NONE
- ]]
-
-vim.cmd [[
-    let g:ale_linters = {
-        \ "python": ["ruff"],
-        \ }
-    let g:ale_fixers = {
-        \ "python": ["black", "ruff"],
-        \ }
-    let g:ale_fix_on_save = 1
-]]
-
-vim.diagnostic.config({
-  virtual_text = false,  -- remove inline virtual text
-  signs = false,         -- remove signs in the sign column
-  underline = false,     -- no underlining
-  update_in_insert = false,
-})

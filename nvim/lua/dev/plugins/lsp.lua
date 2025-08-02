@@ -1,164 +1,83 @@
-
-
 return {
-    {
-        "VonHeikemen/lsp-zero.nvim",
-        branch = "v4.x",
-        lazy = true,
-        config = false,
-        init = function()
-            -- Disable automatic setup, we are doing it manually
-            vim.g.lsp_zero_extend_cmp = 0
-            vim.g.lsp_zero_extend_lspconfig = 0
-        end,
-    },
+	{
+		"hrsh7th/cmp-nvim-lsp", -- <<== dòng này thiếu
+		dependencies = { "hrsh7th/nvim-cmp" },
+	},
 
-    {
-        "williamboman/mason.nvim",
-        lazy = false,
-        opts = {
-            auto_install = true,
-        },
-        config = true,
-    },
+	{
+		"williamboman/mason.nvim",
+		-- version = "v1.11.0",
+		config = function()
+			require("mason").setup()
+		end,
+	},
+	{
+		"williamboman/mason-lspconfig.nvim",
+		lazy = false,
+		opts = {
+			auto_install = true,
+			-- manually install packages that do not exist in this list please
+			ensure_installed = { "lua_ls", "zls", "ts_ls" },
+		},
+	},
+	{
+		"neovim/nvim-lspconfig",
+		lazy = false,
+		config = function()
+			local capabilities = require("cmp_nvim_lsp").default_capabilities()
+			local lspconfig = require("lspconfig")
+			-- lua
+			lspconfig.lua_ls.setup({
+				capabilities = capabilities,
+				settings = {
+					Lua = {
+						diagnostics = {
+							globals = { "vim" },
+						},
+						workspace = {
+							library = vim.api.nvim_get_runtime_file("", true),
+							checkThirdParty = false,
+						},
+						telemetry = {
+							enable = false,
+						},
+					},
+				},
+			})
+			-- typescript
+			lspconfig.ts_ls.setup({
+				capabilities = capabilities,
+			})
+			-- Js
+			lspconfig.eslint.setup({
+				capabilities = capabilities,
+			})
 
-    -- snippets
-    {
-        "L3MON4D3/LuaSnip",
-        dependencies = {
-            "saadparwaiz1/cmp_luasnip",
-            "rafamadriz/friendly-snippets",
-        },
-    },
+			-- python
+			lspconfig.pylsp.setup({ capabilities = capabilities })
 
-    -- Autocompletion
-    {
-        "hrsh7th/nvim-cmp",
-        event = "InsertEnter",
-        dependencies = {
-            { "L3MON4D3/LuaSnip" },
-        },
-        config = function()
-            -- Here is where you configure the autocompletion settings.
-            local lsp_zero = require("lsp-zero")
-            lsp_zero.extend_cmp()
-
-            -- And you can configure cmp even more, if you want to.
-            local cmp = require("cmp")
-            local cmp_action = lsp_zero.cmp_action()
-
-            require("luasnip.loaders.from_vscode").lazy_load()
-
-            cmp.setup({
-                formatting = lsp_zero.cmp_format({ details = true }),
-                sources = {
-                    { name = "nvim_lsp" },
-                    { name = "luasnip" },
-                },
-                mapping = cmp.mapping.preset.insert({
-                    ["<CR>"] = cmp.mapping.confirm({ select = false }),
-                    ["<C-Space>"] = cmp.mapping.complete(),
-                    ["<C-u>"] = cmp.mapping.scroll_docs(-4),
-                    ["<C-d>"] = cmp.mapping.scroll_docs(4),
-                    ["<C-f>"] = cmp_action.luasnip_jump_forward(),
-                    ["<C-b>"] = cmp_action.luasnip_jump_backward(),
-                    ['<Tab>'] = cmp.mapping(function(fallback)
-                      local col = vim.fn.col('.') - 1
-
-                      if cmp.visible() then
-                        cmp.select_next_item(select_opts)
-                      elseif col == 0 or vim.fn.getline('.'):sub(col, col):match('%s') then
-                        fallback()
-                      else
-                        cmp.complete()
-                      end
-                    end, {'i', 's'}),
-                }),
-                snippet = {
-                    expand = function(args)
-                        require("luasnip").lsp_expand(args.body)
-                    end,
-                },
-            })
-        end,
-    },
-
-    -- LSP
-    {
-        "neovim/nvim-lspconfig",
-        cmd = { "LspInfo", "LspInstall", "LspStart" },
-        event = { "BufReadPre", "BufNewFile" },
-        dependencies = {
-            { "hrsh7th/cmp-nvim-lsp" },
-            { "williamboman/mason-lspconfig.nvim" },
-        },
-        config = function()
-            -- This is where all the LSP shenanigans will live
-            local lsp_zero = require("lsp-zero")
-            lsp_zero.extend_lspconfig()
-
-            --- if you want to know more about lsp-zero and mason.nvim
-            --- read this: https://github.com/VonHeikemen/lsp-zero.nvim/blob/v3.x/doc/md/guides/integrate-with-mason-nvim.md
-            lsp_zero.on_attach(function(client, bufnr)
-                -- see :help lsp-zero-keybindings
-                -- to learn the available actions
-                lsp_zero.default_keymaps({ buffer = bufnr })
-            end)
-
-            require("mason-lspconfig").setup({
-                ensure_installed = { "pyright","jdtls" },
-                handlers = {
-                    -- this first function is the "default handler"
-                    -- it applies to every language server without a "custom handler"
-                    function(server_name)
-                        require("lspconfig")[server_name].setup({})
-                    end,
-
-                    -- this is the "custom handler" for `lua_ls`
-                    lua_ls = function()
-                        -- (Optional) Configure lua language server for neovim
-                        local lua_opts = lsp_zero.nvim_lua_ls()
-                        require("lspconfig").lua_ls.setup(lua_opts)
-                    end,
-                },
-            })
-        end,
-    },
-
-    -- Linter and Formatter
-    {
-        "nvimtools/none-ls.nvim",
-        event = { "BufReadPre", "BufNewFile" },
-        dependencies = {
-            "williamboman/mason.nvim",
-            "jay-babu/mason-null-ls.nvim",
-        },
-        config = function()
-            local null_ls = require("null-ls")
-            local mason_null_ls = require("mason-null-ls")
-
-            -- Register your formatters and linters here
-            null_ls.setup({
-                sources = {
-                    -- Formatters
-                    -- Linters
-                },
-                -- Optional on_attach (if needed)
-                on_attach = function(client, bufnr)
-                    -- You can use lsp-zero keymaps here if you like
-                    -- local lsp_zero = require("lsp-zero")
-                    -- lsp_zero.default_keymaps({ buffer = bufnr })
-                end,
-            })
-
-            mason_null_ls.setup({
-                ensure_installed = {
-                    "ruff",
-                    "black"
-                },
-                automatic_installation = true,
-            })
-        end,
-    }
+			-- lsp kepmap setting
+			vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
+			vim.keymap.set("n", "gi", vim.lsp.buf.implementation, {})
+			vim.keymap.set("n", "gd", vim.lsp.buf.definition, {})
+			vim.keymap.set("n", "gD", vim.lsp.buf.declaration, {})
+			vim.keymap.set("n", "gr", vim.lsp.buf.references, {})
+			vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, {})
+			vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, {})
+			-- list all methods in a file
+			-- working with go confirmed, don't know about other, keep changing as necessary
+			vim.keymap.set("n", "<leader>fm", function()
+				local filetype = vim.bo.filetype
+				local symbols_map = {
+					python = "function",
+					javascript = "function",
+					typescript = "function",
+					java = "class",
+					lua = "function",
+				}
+				local symbols = symbols_map[filetype] or "function"
+				require("fzf-lua").lsp_document_symbols({ symbols = symbols })
+			end, {})
+		end,
+	},
 }
-

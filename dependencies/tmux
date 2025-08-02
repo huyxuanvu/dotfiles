@@ -1,5 +1,0 @@
-
---  using below repo to install gruvbox status line 
-git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
--- install manager
-tmux-plugin-manager
